@@ -42,10 +42,7 @@ jobs:
           chmod a+x ~/bin/repo
           export PATH=~/bin:$PATH
           ls -alh ~/bin/repo
-          repo -h
-
-      - name: repo sync  Android source
-        run: |    
+          repo -h|    
           repo init -u https://android.googlesource.com/platform/manifest
           repo sync -j4
 
