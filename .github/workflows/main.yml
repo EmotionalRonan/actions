@@ -1,0 +1,46 @@
+name: Build Android
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+
+      - name: Install required packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openjdk-11-jdk git-core gnupg flex bison gperf build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z-dev ccache libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig
+
+      - name: Download Android source
+        run: |
+          mkdir -p ~/bin
+          curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+          chmod a+x ~/bin/repo
+          export PATH=~/bin:$PATH
+          repo init -u https://android.googlesource.com/platform/manifest
+          repo sync -j4
+
+      - name: Set up environment
+        run: |
+          source build/envsetup.sh
+          lunch aosp_arm-eng
+
+      - name: Build Android
+        run: |
+          make -j$(nproc)
